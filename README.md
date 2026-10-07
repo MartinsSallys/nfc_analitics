@@ -102,3 +102,20 @@ tests/         # Testes automatizados
 As pastas de funcionalidades estão preparadas; seus modelos e regras serão
 implementados nas próximas issues. Para verificar apenas a aplicação, é possível
 executar Uvicorn sem iniciar o PostgreSQL.
+
+## Modelo de loja
+
+`Store` tem `id`, `name`, `description`, `logo_url`, `is_active`, `created_at` e
+`updated_at`. O schema `StoreCreate` exige nome preenchido e remove espaços nas
+extremidades; `StoreRead` permite representar registros consultados.
+`updated_at` é preenchido na criação e atualizado nas alterações emitidas pelo
+SQLAlchemy; não há trigger para alterações feitas diretamente por SQL.
+A migração `0003` adiciona o campo sem apagar as lojas existentes.
+O `slug` opcional foi dispensado: a URL pública usa o código da placa.
+Endpoints administrativos: `POST /stores` cadastra (201); `GET /stores/{id}` consulta
+(200 ou 404). Entradas inválidas retornam 422. Configure `ADMIN_USERNAME` e
+`ADMIN_PASSWORD` no `.env` para usar autenticação HTTP Basic pelo botão Authorize
+em `/docs`. Credenciais incorretas/ausentes retornam 401; configuração vazia
+bloqueia o acesso (503). Em produção, HTTP Basic exige HTTPS. O formulário de
+login e as sessões da interface administrativa ainda serão definidos.
+O Compose repassa essas credenciais do `.env` ao serviço de aplicação.

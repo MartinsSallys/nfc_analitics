@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 import pytest
@@ -5,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from app.models import Plate, Store
+from app.schemas.store import StoreCreate, StoreRead
 
 
 def make_store(session):
@@ -107,3 +109,31 @@ def test_store_with_plate_cannot_be_deleted_accidentally(db_session):
     with pytest.raises(IntegrityError):
         db_session.commit()
     db_session.rollback()
+
+
+def test_store_updated_at_changes_without_changing_creation_date(db_session):
+    old_date = datetime(2000, 1, 1, tzinfo=UTC)
+    store = Store(name="Antes", created_at=old_date, updated_at=old_date)
+    db_session.add(store)
+    db_session.commit()
+    store.name = "Depois"
+    db_session.commit()
+    db_session.refresh(store)
+    assert store.created_at == old_date
+    assert store.updated_at > old_date
+    assert store.updated_at.tzinfo is not None
+
+
+def test_validated_store_can_be_created_and_read(db_session):
+    data = StoreCreate(name="  Minha loja  ", logo_url="/uploads/logo.png")
+    store = Store(**data.model_dump())
+    db_session.add(store)
+    db_session.commit()
+    store_id = store.id
+    db_session.expunge_all()
+    saved = db_session.get(Store, store_id)
+    result = StoreRead.model_validate(saved)
+    assert result.name == "Minha loja"
+    assert result.logo_url == "/uploads/logo.png"
+    assert result.created_at.tzinfo is not None
+    assert result.updated_at.tzinfo is not None
