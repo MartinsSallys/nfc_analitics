@@ -40,4 +40,6 @@ Acesso ao banco: FastAPI → SQLAlchemy → Psycopg 3 → PostgreSQL.
 
 ## Decisões de implementação pendentes
 
-Versões exatas, mecanismo de sessão administrativa, armazenamento de logos, estratégia de backup e configuração de deploy serão definidos nas respectivas etapas. Esta aprovação não instala dependências nem implementa funcionalidades.
+Mecanismo de sessão administrativa, estratégia de backup e configuração de deploy serão definidos nas respectivas etapas. As versões instaladas estão registradas em `poetry.lock`.
+
+Logos: a loja envia a imagem ao administrador. O arquivo ficará em uma pasta persistente de uploads, com volume no Docker, e cada loja terá seu caminho público opcional no campo `logo_url` do PostgreSQL. O upload e o volume ainda serão implementados. Esta aprovação não instala dependências nem implementa funcionalidades.

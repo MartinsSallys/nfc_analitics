@@ -39,12 +39,39 @@ A rota de saúde verifica somente a aplicação; não garante conexão com o ban
 ## Verificações
 
 ```bash
+poetry run pytest
 poetry run ruff check .
 poetry run ruff format --check .
 ```
 
-pytest e HTTPX estão instalados para os testes das próximas funcionalidades.
-Alembic está instalado; suas migrações serão configuradas com os primeiros modelos.
+Os testes verificam saúde, configuração, persistência de lojas e placas,
+restrições do PostgreSQL e reversão/reaplicação das migrações.
+É necessário Docker em execução para rodar a suíte completa. Os testes criam
+um PostgreSQL 17 descartável em porta aleatória e removem o container ao terminar;
+não usam o banco de desenvolvimento nem o `DATABASE_URL` do seu `.env`.
+Para rodar apenas os testes sem banco:
+
+```bash
+poetry run pytest tests/test_health.py tests/test_config.py
+```
+HTTPX usa ASGITransport diretamente, evitando o aviso de descontinuação do TestClient.
+Alembic está configurado. Para criar/atualizar as tabelas com o banco local iniciado:
+
+```bash
+poetry run alembic upgrade head
+poetry run alembic current
+```
+
+Se estiver usando aplicação e banco em containers:
+
+```bash
+docker compose exec app alembic upgrade head
+```
+
+A primeira migração cria `stores`; a segunda cria `plates`, com vínculo obrigatório
+à loja e código público único. O código é gerado pelo Python ao salvar e não deve
+ser alterado nos futuros endpoints de edição. Novas alterações serão adicionadas como novas
+migrações; a aplicação não cria tabelas automaticamente ao iniciar.
 
 ## Banco e configuração
 
@@ -54,3 +81,22 @@ O Compose usa o host `db` para a conexão da aplicação em container.
 O banco guarda os dados em um volume. `docker compose down` preserva esse volume;
 `docker compose down -v` apaga os dados locais.
 A configuração atual é para desenvolvimento; o deploy na VPS será preparado posteriormente.
+
+## Estrutura
+
+```text
+app/
+  main.py       # Criação da aplicação
+  api/          # Rotas HTTP
+  core/         # Configuração e conexão com o banco
+  models/       # Modelos de persistência
+  schemas/      # Dados de entrada e saída
+  services/     # Regras de negócio
+  templates/    # Páginas Jinja2
+  static/       # CSS, JavaScript e imagens
+tests/         # Testes automatizados
+```
+
+As pastas de funcionalidades estão preparadas; seus modelos e regras serão
+implementados nas próximas issues. Para verificar apenas a aplicação, é possível
+executar Uvicorn sem iniciar o PostgreSQL.

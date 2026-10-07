@@ -1,9 +1,6 @@
 from fastapi import FastAPI
 
+from app.api.health import router as health_router
+
 app = FastAPI(title="NFC Analytics", version="0.1.0")
-
-
-@app.get("/health")
-def health() -> dict[str, str]:
-    """Verifica se a aplicação responde; não verifica a conexão com o banco."""
-    return {"status": "ok"}
+app.include_router(health_router)
