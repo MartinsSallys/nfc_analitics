@@ -76,7 +76,9 @@ migrações; a aplicação não cria tabelas automaticamente ao iniciar.
 ## Banco e configuração
 
 `.env.example` contém credenciais exclusivamente locais. `.env` não é versionado.
-Se alterar as credenciais locais, atualize também `DATABASE_URL` para a execução pelo Poetry.
+O PostgreSQL local usa a porta 15432 para evitar conflito com outros bancos.
+Se alterar `POSTGRES_PORT` ou as credenciais, atualize também `DATABASE_URL`
+para a execução pelo Poetry. Dentro do Compose, o banco continua usando a porta 5432.
 O Compose usa o host `db` para a conexão da aplicação em container.
 O banco guarda os dados em um volume. `docker compose down` preserva esse volume;
 `docker compose down -v` apaga os dados locais.
