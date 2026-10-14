@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, pool
 
 from app.core.config import Settings
 from app.core.database import Base
-from app.models import Event, Plate, Store  # noqa: F401
+from app.models import Event, Link, Plate, Store  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:

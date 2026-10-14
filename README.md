@@ -135,3 +135,30 @@ bloqueia eventos de placas inativas, inclusive por SQL direto. O bloqueio usa
 um lock de leitura na placa durante a gravação para coordenar desativações.
 Desativar uma placa preserva os eventos anteriores. As rotas públicas de tracking
 e redirects ainda serão implementadas nas respectivas issues.
+
+## Links da loja
+
+`Link` guarda `id`, `store_id`, `destination`, `url`, `is_active` e `created_at`.
+Os destinos iniciais da issue #6 são `google`, `whatsapp` e `instagram`.
+O schema `LinkCreate` e o modelo validam URLs HTTP/HTTPS e recusam URLs com
+credenciais embutidas. O banco restringe os destinos e exige uma loja existente.
+Os campos podem ser consultados com `LinkRead`.
+
+Links podem ser desativados, reativados e ter sua URL alterada. Os endpoints
+administrativos de links e os redirects públicos ainda não foram implementados.
+A migração `0006` cria a tabela e limita cada loja a um link por destino,
+inclusive se o link estiver inativo. Para trocar o endereço, edite o link existente.
+Lojas diferentes podem cadastrar os mesmos tipos de destino.
+
+## Eventos
+
+O modelo `Event` da issue #7 foi antecipado na #5 e contém somente `id`,
+`plate_id`, `event_type` e `created_at`. Não armazena IP, identificação do visitante,
+user agent ou outros dados pessoais. Os tipos controlados são `page_view`,
+`google_click`, `whatsapp_click` e `instagram_click`.
+
+`record_event` verifica a placa e faz flush sem commit: o chamador decide se a
+transação inteira deve ser confirmada ou revertida. Cada interação gera um novo
+registro, inclusive interações repetidas. O PostgreSQL também valida tipo e vínculo.
+A migração `0005` já cria essa estrutura; nenhuma migração adicional é necessária
+para a revisão da issue #7. As rotas de tracking continuam nas próximas issues.

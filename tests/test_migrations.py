@@ -6,8 +6,8 @@ def test_migrations_match_models_and_are_reversible(migrated_database):
     engine, config = migrated_database
     command.check(config)
     with engine.connect() as connection:
-        assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0005"
-    assert {"stores", "plates"} <= set(inspect(engine).get_table_names())
+        assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0006"
+    assert {"stores", "plates", "links", "events"} <= set(inspect(engine).get_table_names())
     command.downgrade(config, "0001")
     assert "stores" in inspect(engine).get_table_names()
     assert "plates" not in inspect(engine).get_table_names()

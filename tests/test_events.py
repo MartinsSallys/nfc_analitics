@@ -90,3 +90,31 @@ def test_database_rejects_unknown_event_type(db_session):
             {"id": uuid4(), "plate_id": plate.id},
         )
     db_session.rollback()
+
+
+def test_repeated_interactions_are_separate_events(db_session):
+    plate = make_plate(db_session)
+    first = record_event(db_session, plate.plate_code, EventType.PAGE_VIEW)
+    second = record_event(db_session, plate.plate_code, EventType.PAGE_VIEW)
+    db_session.commit()
+    assert first.id != second.id
+    assert db_session.scalar(select(func.count()).select_from(Event)) == 2
+
+
+def test_caller_can_rollback_event_recording(db_session):
+    plate = make_plate(db_session)
+    record_event(db_session, plate.plate_code, EventType.WHATSAPP_CLICK)
+    db_session.rollback()
+    assert db_session.scalar(select(func.count()).select_from(Event)) == 0
+
+
+def test_event_is_read_back_with_type_and_timestamp(db_session):
+    plate = make_plate(db_session)
+    event = record_event(db_session, plate.plate_code, EventType.INSTAGRAM_CLICK)
+    db_session.commit()
+    event_id, plate_id = event.id, plate.id
+    db_session.expunge_all()
+    saved = db_session.get(Event, event_id)
+    assert saved.plate_id == plate_id
+    assert saved.event_type == EventType.INSTAGRAM_CLICK
+    assert saved.created_at.tzinfo is not None
