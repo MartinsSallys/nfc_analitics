@@ -119,3 +119,19 @@ em `/docs`. Credenciais incorretas/ausentes retornam 401; configuração vazia
 bloqueia o acesso (503). Em produção, HTTP Basic exige HTTPS. O formulário de
 login e as sessões da interface administrativa ainda serão definidos.
 O Compose repassa essas credenciais do `.env` ao serviço de aplicação.
+
+## Modelo de placa
+
+`Plate` tem `id`, `store_id`, `plate_code`, `name` opcional, `is_active`,
+`created_at` e `updated_at`. O código é aleatório, único e independente do nome
+da loja. O campo `updated_at` é atualizado pelo SQLAlchemy, como nas lojas.
+A migração `0004` adiciona essa data preservando registros existentes.
+
+O serviço `require_active_plate` recusa placas inexistentes ou inativas e
+consulta o estado no banco mesmo quando a placa já foi carregada na sessão.
+O serviço `record_event` grava os eventos iniciais previstos na issue #7 e usa
+essa verificação. A migração `0005` também aplica um trigger no PostgreSQL que
+bloqueia eventos de placas inativas, inclusive por SQL direto. O bloqueio usa
+um lock de leitura na placa durante a gravação para coordenar desativações.
+Desativar uma placa preserva os eventos anteriores. As rotas públicas de tracking
+e redirects ainda serão implementadas nas respectivas issues.
