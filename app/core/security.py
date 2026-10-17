@@ -4,8 +4,6 @@ from urllib.parse import urlsplit
 from fastapi import Request
 from starlette.responses import JSONResponse
 
-from app.core.config import Settings
-
 # URLs privadas contêm segredos: não registrar caminhos reais nas access logs.
 logging.getLogger("uvicorn.access").disabled = True
 logger = logging.getLogger("nfc.requests")
@@ -18,7 +16,7 @@ if not logger.handlers:
 
 
 async def security_headers(request: Request, call_next):
-    settings = Settings()
+    settings = request.app.state.settings
     if request.method not in {"GET", "HEAD", "OPTIONS"}:
         origin = request.headers.get("origin")
         expected = (

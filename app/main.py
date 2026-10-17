@@ -19,6 +19,7 @@ app = FastAPI(
     redoc_url=None if settings.environment == "production" else "/redoc",
     openapi_url=None if settings.environment == "production" else "/openapi.json",
 )
+app.state.settings = settings
 app.middleware("http")(security_headers)
 app.include_router(health_router)
 app.include_router(stores_router)

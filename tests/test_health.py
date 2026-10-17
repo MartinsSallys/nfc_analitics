@@ -5,8 +5,9 @@ from httpx import ASGITransport, AsyncClient
 from app.main import app
 
 
-def test_health_responds_without_database(monkeypatch):
+def test_health_responds_without_database(monkeypatch, tmp_path):
     monkeypatch.delenv("DATABASE_URL", raising=False)
+    monkeypatch.chdir(tmp_path)
 
     async def request():
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:

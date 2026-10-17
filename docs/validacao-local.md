@@ -46,7 +46,9 @@ As capturas usam lojas e eventos fictícios.
 
 ## Não verificado externamente
 
-- CI no GitHub: consultar o resultado da execução do workflow após o push.
+- CI no GitHub: a primeira execução revelou dependência indevida do `.env` no
+  middleware de segurança. Corrigida para usar a configuração validada na
+  inicialização; o teste de saúde também roda sem `.env`. Consultar a nova execução.
 - VPS real, domínio/DNS e certificado público.
 - Leitura de QR e NFC em celulares reais.
 - Uso por uma pessoa externa e feedback da loja piloto.
