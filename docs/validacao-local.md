@@ -44,11 +44,18 @@ o banco de desenvolvimento é preservado.
 
 As capturas usam lojas e eventos fictícios.
 
+## CI no GitHub
+
+A primeira execução revelou dependência indevida do `.env` no middleware de
+segurança. A correção `636e90e` usa a configuração validada na inicialização e
+o teste de saúde também roda sem `.env`.
+
+A [execução 39032858736](https://github.com/MartinsSallys/nfc_analitics/actions/runs/39032858736)
+passou com Python 3.12, Ruff, formatação e a suíte de testes. A validação local
+usou Python 3.14; a simulação de produção usou a imagem Python 3.12.
+
 ## Não verificado externamente
 
-- CI no GitHub: a primeira execução revelou dependência indevida do `.env` no
-  middleware de segurança. Corrigida para usar a configuração validada na
-  inicialização; o teste de saúde também roda sem `.env`. Consultar a nova execução.
 - VPS real, domínio/DNS e certificado público.
 - Leitura de QR e NFC em celulares reais.
 - Uso por uma pessoa externa e feedback da loja piloto.
