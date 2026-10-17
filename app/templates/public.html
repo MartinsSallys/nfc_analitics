@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ store.name }}{% endblock %}
+{% block body %}<main class="public-shell"><article class="store-card">
+<div class="eyebrow"><span class="dot"></span> CONECTE-SE COM A LOJA</div>
+{% if store.logo_url and store.logo_url.startswith('/uploads/') %}
+<img class="store-logo" src="{{ store.logo_url }}" alt="Logo de {{ store.name }}" width="88" height="88">
+{% else %}<div class="store-monogram" aria-hidden="true">{{ store.name[:1] }}</div>{% endif %}
+<h1>{{ store.name }}</h1>{% if store.description %}<p class="description">{{ store.description }}</p>{% endif %}
+<p class="section-label">Como podemos ajudar?</p><nav class="destinations" aria-label="Canais da loja">
+{% for link in links %}<a class="destination {{ link.destination.value }}" href="/r/{{ plate.plate_code }}/{{ link.destination.value }}">
+<span class="destination-symbol" aria-hidden="true">{{ {'google':'G','whatsapp':'W','instagram':'◎'}[link.destination.value] }}</span>
+<span>{{ labels[link.destination.value] }}</span><span class="arrow" aria-hidden="true">↗</span></a>
+{% else %}<p class="empty">Os canais desta loja estarão disponíveis em breve.</p>{% endfor %}</nav>
+<footer>Um toque. Mais perto.</footer></article><p class="powered">NFC ANALYTICS</p></main>{% endblock %}

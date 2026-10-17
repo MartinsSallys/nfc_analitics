@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Métricas · {{ metrics.store_name }}{% endblock %}
+{% block body %}<main class="container"><header class="topbar"><span class="brand">NFC ANALYTICS</span><span class="badge">Consulta privada</span></header>
+<h1>{{ metrics.store_name }}</h1><p class="muted">Veja como os clientes se conectam com sua loja.</p>
+<section class="grid" aria-label="Métricas de acessos e cliques">
+{% for label,value in [('Acessos totais',metrics.page_views),('Acessos hoje',metrics.today),('Últimos 7 dias',metrics.last_7_days),('Cliques no Google',metrics.google_clicks),('Cliques no WhatsApp',metrics.whatsapp_clicks),('Cliques no Instagram',metrics.instagram_clicks)] %}
+<article class="metric"><span>{{ label }}</span><strong>{{ value }}</strong></article>{% endfor %}</section>
+<section class="panel metrics-plates"><h2>Suas placas</h2><div class="table-wrap"><table><thead><tr><th>Placa</th><th>Situação</th><th>Acessos</th></tr></thead><tbody>
+{% for plate in metrics.plates %}<tr><td>{{ plate.name }}</td><td>{{ 'Ativa' if plate.active else 'Inativa' }}</td><td>{{ plate.page_views }}</td></tr>{% else %}<tr><td colspan="3">Nenhuma placa cadastrada.</td></tr>{% endfor %}
+</tbody></table></div></section><p class="muted">Cada acesso ou clique é um evento, não uma pessoa única. Os últimos 7 dias incluem hoje e os 6 dias anteriores. Horário: {{ metrics.timezone }}.</p>
+<p class="muted">Guarde este link: qualquer pessoa com ele pode consultar suas métricas.</p></main>{% endblock %}

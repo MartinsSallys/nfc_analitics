@@ -1,0 +1,72 @@
+name: nfc-production
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Defina POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:?Defina POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  app:
+    build: .
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      ENVIRONMENT: production
+      DATABASE_URL: ${DATABASE_URL:?Defina DATABASE_URL}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:?Defina ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Defina ADMIN_PASSWORD}
+      SECRET_KEY: ${SECRET_KEY:?Defina SECRET_KEY}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?Defina PUBLIC_BASE_URL}
+      UPLOAD_DIR: /data/uploads
+      BUSINESS_TIMEZONE: America/Fortaleza
+    volumes:
+      - uploads_data:/data/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log", "--proxy-headers", "--forwarded-allow-ips", "*"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os,urllib.request; from urllib.parse import urlparse; r=urllib.request.Request('http://127.0.0.1:8000/health',headers={'Host':urlparse(os.environ['PUBLIC_BASE_URL']).netloc}); urllib.request.urlopen(r)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+  nginx:
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    ports:
+      - "${HTTP_BIND:-0.0.0.0}:${HTTP_PORT:-80}:80"
+      - "${HTTP_BIND:-0.0.0.0}:${HTTPS_PORT:-443}:443"
+    environment:
+      APP_HOST: ${APP_HOST:?Defina APP_HOST}
+      NGINX_ENVSUBST_FILTER: APP_HOST
+    volumes:
+      - ./deploy/proxy_params:/etc/nginx/proxy_params:ro,Z
+      - ./deploy/nginx.conf.template:/etc/nginx/templates/default.conf.template:ro,Z
+      - letsencrypt:/etc/letsencrypt:ro
+      - certbot_webroot:/var/www/certbot:ro
+    depends_on:
+      app:
+        condition: service_healthy
+  certbot:
+    image: certbot/certbot:latest
+    profiles: ["certificate"]
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+      - certbot_webroot:/var/www/certbot
+volumes:
+  postgres_data:
+  uploads_data:
+  letsencrypt:
+  certbot_webroot:

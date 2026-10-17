@@ -17,6 +17,9 @@ pydantic-settings = ">=2.0,<3.0"
 sqlalchemy = ">=2.0,<2.1"
 psycopg = {version = ">=3.2,<4.0", extras = ["binary"]}
 alembic = ">=1.13,<2.0"
+qrcode = {version = ">=8,<9", extras = ["pil"]}
+python-multipart = ">=0.0.20,<1"
+pillow = ">=11,<13"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.0,<10.0"

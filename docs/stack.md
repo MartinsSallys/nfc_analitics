@@ -13,7 +13,7 @@
 | Banco | PostgreSQL | Persistência dos dados |
 | Driver | Psycopg 3 | Comunicação do Python com PostgreSQL |
 | Migrações | Alembic | Histórico de alterações das tabelas |
-| Testes | pytest e HTTPX/TestClient | Verificação das regras e rotas |
+| Testes | pytest e HTTPX/ASGITransport | Verificação das regras e rotas |
 | Qualidade do código | Ruff | Formatação e análise |
 | Containers | Docker e Docker Compose | Aplicação e banco em serviços separados |
 
@@ -38,8 +38,17 @@ Acesso ao banco: FastAPI → SQLAlchemy → Psycopg 3 → PostgreSQL.
 - Provedor, plano, RAM, domínio e contratação serão decididos ao final do desenvolvimento local.
 - Orçamento informado: R$ 50 mensais. Nenhum serviço contratado nesta etapa.
 
-## Decisões de implementação pendentes
+## Implementação e pendências
 
-Mecanismo de sessão administrativa, estratégia de backup e configuração de deploy serão definidos nas respectivas etapas. As versões instaladas estão registradas em `poetry.lock`.
+A administração usa HTTP Basic, com credenciais no ambiente; HTTPS é obrigatório
+em produção. Não há senha ou conta de lojista: os links privados usam tokens
+aleatórios com hash HMAC no banco e podem ser revogados/rotacionados.
 
-Logos: a loja envia a imagem ao administrador. O arquivo ficará em uma pasta persistente de uploads, com volume no Docker, e cada loja terá seu caminho público opcional no campo `logo_url` do PostgreSQL. O upload e o volume ainda serão implementados. Esta aprovação não instala dependências nem implementa funcionalidades.
+Logos são enviados ao administrador e cadastrados por upload validado, com os
+arquivos em volume persistente. O PostgreSQL guarda o caminho público da imagem.
+QR Codes usam qrcode/Pillow; uploads usam python-multipart/Pillow.
+As versões exatas estão registradas em `poetry.lock`.
+
+A configuração de produção, Nginx/HTTPS e script de backup estão preparados e
+foram testados em containers locais. Ainda faltam VPS, domínio e validação física
+com a loja piloto. Veja [operação](producao.md) e [piloto](piloto.md).

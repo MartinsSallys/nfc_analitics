@@ -1,0 +1,27 @@
+limit_req_zone $binary_remote_addr zone=admin_limit:10m rate=60r/m;
+server {
+    listen 80;
+    server_name ${APP_HOST};
+    location /.well-known/acme-challenge/ { root /var/www/certbot; }
+    location / { return 301 https://${APP_HOST}$request_uri; }
+}
+server {
+    listen 443 ssl;
+    server_name ${APP_HOST};
+    ssl_certificate /etc/letsencrypt/live/${APP_HOST}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${APP_HOST}/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    client_max_body_size 3m;
+    # Não registrar tokens privados, códigos de placa ou IPs de visitantes.
+    access_log off;
+    error_log /var/log/nginx/error.log crit;
+    location ~ ^/(admin|stores) {
+        limit_req zone=admin_limit burst=30 nodelay;
+        proxy_pass http://app:8000;
+        include /etc/nginx/proxy_params;
+    }
+    location / {
+        proxy_pass http://app:8000;
+        include /etc/nginx/proxy_params;
+    }
+}

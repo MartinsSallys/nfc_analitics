@@ -1,0 +1,11 @@
+name: nfc-production
+services:
+  bootstrap:
+    image: nginx:stable-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.bootstrap.conf:/etc/nginx/conf.d/default.conf:ro,Z
+      - certbot_webroot:/var/www/certbot:ro
+volumes:
+  certbot_webroot:
